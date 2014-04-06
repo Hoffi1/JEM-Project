@@ -166,7 +166,7 @@ class JEMModelEventslist extends JModelLegacy
 
 		// Get Events from Database ...
 		$query = ' SELECT a.id, a.dates, a.registra, a.featured, a.datimage, a.enddates, a.times, a.endtimes, a.title, a.created, a.locid, a.maxplaces, a.waitinglist, a.fulltext, '
-				. ' a.recurrence_number, a.recurrence_first_id, a.recurrence_type, '
+				. ' a.recurrence_number, a.recurrence_first_id, a.recurrence_type, a.created_by, '
 				. ' l.venue, l.city, l.state, l.url, l.street, ct.name AS countryname, '
 				. ' c.catname, c.id AS catid,'
 				. ' CASE WHEN CHAR_LENGTH(a.alias) THEN CONCAT_WS(\':\', a.id, a.alias) ELSE a.id END as slug,'

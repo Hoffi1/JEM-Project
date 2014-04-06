@@ -251,6 +251,19 @@ class JemViewVenue extends JEMView {
 				$allowedtoeditvenue = 0;
 			}
 
+			// Check if user can edit
+			if (!empty($rows)) {
+				$genedit  = JemUser::validate_user($jemsettings->eventeditrec, $jemsettings->eventedit) ||
+				            $user->authorise('core.edit','com_jem');
+
+				// Check per event
+				foreach ($rows as $row) {
+					$row->allowedtoedit = ($genedit || JemUser::ismaintainer('edit',$row->id) ||
+					                       ($jemsettings->eventowner == 1 && !empty($row->created_by) &&
+					                        $row->created_by == $user->get('id')));
+				}
+			}
+
 			// Generate Venuedescription
 			if (!$venue->locdescription == '' || !$venue->locdescription == '<br />') {
 				// execute plugins

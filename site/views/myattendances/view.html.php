@@ -68,6 +68,19 @@ class JemViewMyattendances extends JViewLegacy
 
 		$task 				= JRequest::getWord('task');
 
+		// Check if user can edit
+		if (!empty($attending)) {
+			$genedit  = JemUser::validate_user($jemsettings->eventeditrec, $jemsettings->eventedit) ||
+			            $user->authorise('core.edit','com_jem');
+
+			// Check per event
+			foreach ($attending as $row) {
+				$row->allowedtoedit = ($genedit || JemUser::ismaintainer('edit',$row->eventid) ||
+				                       ($jemsettings->eventowner == 1 && !empty($row->created_by) &&
+				                        $row->created_by == $user->get('id')));
+			}
+		}
+
 		//search filter
 		$filters = array();
 

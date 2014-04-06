@@ -127,6 +127,7 @@ class JEMModelDay extends JModelLegacy
 			$query = $this->_buildQuery();
 			$pagination = $this->getPagination();
 			$this->_data = $this->_getList($query, $pagination->limitstart, $pagination->limit);
+			JEMHelper::getAttendeesNumbers($this->_data);
 
 			$count = count($this->_data);
 			for($i = 0; $i < $count; $i++)
@@ -195,7 +196,7 @@ class JEMModelDay extends JModelLegacy
 
 		//Get Events from Database
 		$query = 'SELECT DISTINCT a.id, a.dates, a.enddates, a.times, a.endtimes, a.title, a.created, a.locid, a.fulltext,'
-				. ' a.recurrence_type, a.recurrence_first_id, '
+				. ' a.recurrence_type, a.recurrence_first_id, a.created_by, a.datimage, a.maxplaces, '
 				. ' l.venue, l.city, l.state, l.url, l.street, ct.name as countryname, '
 				. ' CASE WHEN CHAR_LENGTH(a.alias) THEN CONCAT_WS(\':\', a.id, a.alias) ELSE a.id END as slug,'
 				. ' CASE WHEN CHAR_LENGTH(l.alias) THEN CONCAT_WS(\':\', a.locid, l.alias) ELSE a.locid END as venueslug'

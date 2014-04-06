@@ -90,8 +90,19 @@ class JemViewCategories extends JEMView
 
 		// Get events if requested
 		if ($params->get('detcat_nr', 0) > 0) {
+			// Check if user can edit
+			$genedit  = JemUser::validate_user($jemsettings->eventeditrec, $jemsettings->eventedit) ||
+			            $user->authorise('core.edit','com_jem');
+
 			foreach($rows as $row) {
 				$row->events = $model->getEventdata($row->id);
+
+				// Check per event
+				foreach ($row->events as $event) {
+					$event->allowedtoedit = ($genedit || JemUser::ismaintainer('edit',$event->id) ||
+					                         ($jemsettings->eventowner == 1 && !empty($event->created_by) &&
+					                          $event->created_by == $user->get('id')));
+				}
 			}
 		}
 

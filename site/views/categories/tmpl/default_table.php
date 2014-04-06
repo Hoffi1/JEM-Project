@@ -72,14 +72,16 @@ defined('_JEXEC') or die;
 				<?php if (($this->jemsettings->showtitle == 1) && ($this->jemsettings->showdetails == 1)) : ?>
 					<td headers="jem_title_cat<?php echo $this->catrow->id; ?>" align="left" valign="top">
 						<a href="<?php echo JRoute::_( JEMHelperRoute::getEventRoute($row->slug)); ?>" itemprop="url">
-							<span itemprop="name"><?php echo $this->escape($row->title) . JemOutput::recurrenceicon($row); ?></span>
+							<span itemprop="name">
+								<?php echo $this->escape($row->title) . (!empty($this->allowedtoedit) ? JemOutput::recurrenceicon($row) : ''); ?>
+							</span>
 						</a>
 					</td>
 				<?php endif; ?>
 
 				<?php if (($this->jemsettings->showtitle == 1) && ($this->jemsettings->showdetails == 0)) : ?>
 					<td headers="jem_title_cat<?php echo $this->catrow->id; ?>" align="left" valign="top" itemprop="name">
-						<?php echo $this->escape($row->title) . JemOutput::recurrenceicon($row); ?>
+						<?php echo $this->escape($row->title) . (!empty($this->allowedtoedit) ? JemOutput::recurrenceicon($row) : ''); ?>
 					</td>
 				<?php endif; ?>
 

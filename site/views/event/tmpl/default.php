@@ -50,7 +50,7 @@ JHtml::_('behavior.modal', 'a.flyermodal');
 	<!-- Event -->
 	<h2 class="jem">
 	<?php 
-		echo JText::_('COM_JEM_EVENT') . JemOutput::recurrenceicon($this->item);
+		echo JText::_('COM_JEM_EVENT') . ($this->allowedtoeditevent ? JemOutput::recurrenceicon($this->item) : '');
 		echo JemOutput::editbutton($this->item, $params, $attribs, $this->allowedtoeditevent, 'editevent');
 		?>
 	</h2>

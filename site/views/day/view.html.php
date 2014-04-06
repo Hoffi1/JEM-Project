@@ -124,6 +124,19 @@ class JemViewDay extends JEMView
 			$dellink = 0;
 		}
 
+		// Check if user can edit
+		if (!empty($rows)) {
+			$genedit  = JemUser::validate_user($jemsettings->eventeditrec, $jemsettings->eventedit) ||
+			            $user->authorise('core.edit','com_jem');
+
+			// Check per event
+			foreach ($rows as $row) {
+				$row->allowedtoedit = ($genedit || JemUser::ismaintainer('edit',$row->id) ||
+				                       ($jemsettings->eventowner == 1 && !empty($row->created_by) &&
+				                        $row->created_by == $user->get('id')));
+			}
+		}
+
 		//add alternate feed link (w/o specific date)
 		$link    = 'index.php?option=com_jem&view=day&format=feed';
 		$attribs = array('type' => 'application/rss+xml', 'title' => 'RSS 2.0');

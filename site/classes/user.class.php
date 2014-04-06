@@ -144,7 +144,7 @@ class JEMUser {
 					. ' LEFT JOIN #__jem_categories AS c ON c.id = a.catid' 
 					. ' WHERE c.published = 1' 
 					. ' AND (c.groupid = ' . $categories . ')' 
-					. ' AND a.itemid = ' . $eventid;
+					. ' AND a.itemid = ' . (int)$eventid;
 			$db->setQuery($query);
 		}
 		else {
