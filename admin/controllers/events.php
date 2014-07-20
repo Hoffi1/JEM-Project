@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.6
+ * @version 1.9.7
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -89,29 +89,5 @@ class JemControllerEvents extends JControllerAdmin
 	}
 
 
-	/**
-	 * logic for remove venues
-	 *
-	 * @access public
-	 * @return void
-	 *
-	 */
-	function remove()
-	{
-		$cid = JRequest::getVar( 'cid', array(0), 'post', 'array' );
-
-		if (!is_array( $cid ) || count( $cid ) < 1) {
-			JError::raiseError(500, JText::_( 'COM_JEM_SELECT_AN_ITEM_TO_DELETE' ) );
-		}
-
-		$model = $this->getModel('events');
-
-		$msg = $model->remove($cid);
-
-		$cache = JFactory::getCache('com_jem');
-		$cache->clean();
-
-		$this->setRedirect( 'index.php?option=com_jem&view=events', $msg );
-	}
 }
 ?>

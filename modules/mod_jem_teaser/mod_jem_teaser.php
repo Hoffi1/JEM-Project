@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.6
+ * @version 1.9.7
  * @package JEM
  * @subpackage JEM Teaser Module
  * @copyright (C) 2013-2014 joomlaeventmanager.net
@@ -18,6 +18,7 @@ require_once(JPATH_SITE.'/components/com_jem/helpers/helper.php');
 require_once(JPATH_SITE.'/components/com_jem/helpers/route.php');
 require_once(JPATH_SITE.'/components/com_jem/classes/image.class.php');
 require_once(JPATH_SITE.'/components/com_jem/classes/Zebra_Image.php');
+require_once(JPATH_SITE.'/components/com_jem/classes/output.class.php');
 
 $paramsdatemethod = $params->get('datemethod', 1);
 $paramsuse_modal = $params->get('use_modal', 0);

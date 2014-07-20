@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.6
+ * @version 1.9.7
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -23,6 +23,7 @@ require_once (JPATH_COMPONENT_SITE.'/classes/user.class.php');
 require_once (JPATH_COMPONENT_SITE.'/classes/attachment.class.php');
 require_once (JPATH_COMPONENT_SITE.'/classes/categories.class.php');
 require_once (JPATH_COMPONENT_ADMINISTRATOR.'/classes/admin.class.php');
+require_once (JPATH_COMPONENT_ADMINISTRATOR.'/helpers/helper.php');
 
 // Set the table directory
 JTable::addIncludePath(JPATH_COMPONENT.'/tables');

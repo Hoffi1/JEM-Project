@@ -1,12 +1,11 @@
 <?php
 /**
- * @version 1.9.6
+ * @version 1.9.7
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
  * @license http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
-
 defined('_JEXEC') or die;
 
 JHtml::addIncludePath(JPATH_COMPONENT.'/helpers/html');
@@ -15,28 +14,13 @@ $userId		= $user->get('id');
 $listOrder	= $this->escape($this->state->get('list.ordering'));
 $listDirn	= $this->escape($this->state->get('list.direction'));
 $canOrder	= $user->authorise('core.edit.state', 'com_jem.category');
-$saveOrder	= $listOrder=='ordering';
+$saveOrder	= $listOrder=='a.ordering';
 
 $params		= (isset($this->state->params)) ? $this->state->params : new JObject();
 $settings	= $this->settings;
-
-/*
-Call the highlight function with the text to highlight.
-http://johannburkard.de/blog/programming/javascript/highlight-javascript-text-higlighting-jquery-plugin.html
-
-To highlight all occurrances of "bla" (case insensitive) in all li elements, use the following code:
-	$('li').highlight('bla');
-
-Remove highlighting
-	The highlight can be removed from any element with the removeHighlight function.
-	In this example, all highlights under the element with the ID highlight-plugin are removed.
-
-	$('#highlight-plugin').removeHighlight();
-*/
 ?>
-
 <script>
-window.addEvent('domready', function(){
+$(document).ready(function() {
 	var h = <?php echo $settings->get('highlight','0'); ?>;
 
 	switch(h)
@@ -104,7 +88,7 @@ window.addEvent('domready', function(){
 			</tr>
 		</tfoot>
 
-		<tbody id="seach_in_here">
+		<tbody id="search_in_here">
 			<?php
 			foreach ($this->items as $i => $row) :
 				//Prepare date
@@ -177,58 +161,27 @@ window.addEvent('domready', function(){
 				<td class="city"><?php echo $row->city ? $this->escape($row->city) : '-'; ?></td>
 				<td class="state"><?php echo $row->state ? $this->escape($row->state) : '-'; ?></td>
 				<td class="category">
-				<?php
-				$ix = 0;
-				?>
-				<?php foreach ($row->categories as $key => $category) : ?>
-					<?php
-					if ($ix) :
-						echo ', ';
-					endif;
-
-					$catlink = 'index.php?option=com_jem&amp;task=category.edit&amp;id='. $category->id;
-					$title = $this->escape($category->catname);
-					if (JString::strlen($category->catname) > 20) {
-						$title = $this->escape(JString::substr($category->catname , 0 , 20)).'...';
-					}
-
-					$path = '';
-					$pix = 0;
-					foreach ($category->parentcats as $key => $parentcats) :
-						if ($pix) :
-							$path .= ' » ';
-						endif;
-						$path .= $parentcats->catname;
-						$pix++;
-					endforeach; ?>
-
-					<?php if ( $category->cchecked_out && ( $category->cchecked_out != $this->user->get('id') ) ) : ?>
-						<?php echo $title; ?>
-					<?php else : ?>
-						<span class="editlinktip hasTip" title="<?php echo JText::_( 'COM_JEM_EDIT_CATEGORY' );?>::<?php echo $path; ?>">
-						<a href="<?php echo $catlink; ?>"><?php echo $title; ?></a>
-						</span>
-					<?php endif; ?>
-					<?php $ix++; ?>
-				<?php endforeach; ?>
+				<?php echo implode(", ", JemOutput::getCategoryList($row->categories, $this->jemsettings->catlinklist,true)); ?>
 				</td>
 				<td class="center"><?php echo $published; ?></td>
 				<td class="center">
 					<?php echo JHtml::_('jemhtml.featured', $row->featured, $i, $canChange); ?>
 				</td>
 				<td>
-					<?php echo JText::_( 'COM_JEM_AUTHOR' ).': '; ?><a href="<?php echo 'index.php?option=com_users&amp;task=edit&amp;hidemainmenu=1&amp;cid[]='.$row->created_by; ?>"><?php echo $row->author; ?></a><br />
-					<?php echo JText::_( 'COM_JEM_EMAIL' ).': '; ?><a href="mailto:<?php echo $row->email; ?>"><?php echo $row->email; ?></a><br />
+					<?php echo JText::_('COM_JEM_AUTHOR').': '; ?><a href="<?php echo 'index.php?option=com_users&amp;task=edit&amp;hidemainmenu=1&amp;cid[]='.$row->created_by; ?>"><?php echo $row->author; ?></a><br />
+					<?php echo JText::_('COM_JEM_EMAIL').': '; ?><a href="mailto:<?php echo $row->email; ?>"><?php echo $row->email; ?></a><br />
 					<?php
 					$created	 	= JHtml::_('date',$row->created,JText::_('DATE_FORMAT_LC2'));
-					$edited 		= JHtml::_('date',$row->modified,JText::_('DATE_FORMAT_LC2') );
-					$ip				= $row->author_ip == 'COM_JEM_DISABLED' ? JText::_( 'COM_JEM_DISABLED' ) : $row->author_ip;
+					$modified 		= JHtml::_('date',$row->modified,JText::_('DATE_FORMAT_LC2') );
 					$image 			= JHtml::_('image','com_jem/icon-16-info.png',NULL,NULL,true );
-					$overlib 		= JText::_( 'COM_JEM_CREATED_AT' ).': '.$created.'<br />';
-					$overlib		.= JText::_( 'COM_JEM_WITH_IP' ).': '.$ip.'<br />';
+
+					$overlib 		= JText::_('COM_JEM_CREATED_AT').': '.$created.'<br />';
+					if ($row->author_ip != '') {
+						$overlib		.= JText::_('COM_JEM_WITH_IP').': '.$row->author_ip.'<br />';
+					}
 					if ($row->modified != '0000-00-00 00:00:00') {
-						$overlib 	.= JText::_( 'COM_JEM_EDITED_AT' ).': '.$edited.'<br />';
-						$overlib 	.= JText::_( 'COM_JEM_EDITED_FROM' ).': '.$row->editor.'<br />';
+						$overlib 	.= JText::_('COM_JEM_EDITED_AT').': '.$modified.'<br />';
+						$overlib 	.= JText::_('COM_JEM_GLOBAL_MODIFIEDBY').': '.$row->modified_by.'<br />';
 					}
 					?>
 					<span class="editlinktip hasTip" title="<?php echo JText::_('COM_JEM_EVENTS_STATS'); ?>::<?php echo $overlib; ?>">

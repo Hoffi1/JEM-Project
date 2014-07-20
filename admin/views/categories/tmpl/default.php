@@ -1,6 +1,6 @@
 <?php
 /**
- * @version     1.9.6
+ * @version     1.9.7
  * @package     JEM
  * @copyright   Copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright   Copyright (C) 2005-2009 Christoph Lukes
@@ -128,7 +128,7 @@ $saveOrder 	= ($listOrder == 'a.lft' && $listDirn == 'asc');
 							<?php endif; ?></p>
 					</td>
 					<td class="center">
-						<div class="colorpreview" style="width: 20px; background-color: <?php echo ( $item->color == '' )?"transparent":$item->color; ?>;" title="<?php echo $item->color; ?>">
+						<div class="colorpreview" style="width: 20px; cursor:default;background-color: <?php echo ( $item->color == '' )?"transparent":$item->color; ?>;" title="<?php echo $item->color; ?>">
 							&nbsp;
 						</div>
 					</td>

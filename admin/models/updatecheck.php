@@ -1,34 +1,26 @@
 <?php
 /**
- * @version 1.9.6
+ * @version 1.9.7
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
  * @license http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
  */
-
 defined('_JEXEC') or die;
 
 jimport('joomla.application.component.model');
+jimport('joomla.filesystem.file');
+
 
 /**
- * JEM Component Updatecheck Model
- *
- * @package JEM
- *
+ * Model-Updatecheck
  */
-class JEMModelUpdatecheck extends JModelLegacy
+class JemModelUpdatecheck extends JModelLegacy
 {
-	/**
-	 * Events data in array
-	 *
-	 * @var array
-	 */
-	var $_updatedata = null;
+	protected $_updatedata = null;
 
 	/**
 	 * Constructor
-	 *
 	 */
 	public function __construct()
 	{
@@ -36,74 +28,53 @@ class JEMModelUpdatecheck extends JModelLegacy
 	}
 
 	/**
-	 * Logic for the Update Check
-	 *
-	 * @access public
-	 * @return object
-	 *
+	 * Retrieval of update-data
 	 */
 	function getUpdatedata()
 	{
-		$installedversion = self::getParam('version');
+		$installedversion	= JemHelper::getParam(1,'version',1,'com_jem');
+		$updateFile			= "http://www.joomlaeventmanager.net/updatecheck/update.xml";
+		$checkFile			= self::CheckFile($updateFile);
+		$updatedata 		= new stdClass();
 
-		include_once(JPATH_COMPONENT_ADMINISTRATOR.'/classes/Snoopy.class.php');
+		if ($checkFile) {
+			$xml = simplexml_load_file($updateFile);
 
-		$snoopy = new Snoopy();
+			//version to check, not visible in table
+			$updatedata->version 			= $xml->version;
 
-		//set the source file
-		$file = 'http://www.joomlaeventmanager.net/updatecheck/update.csv';
-
-		$snoopy->read_timeout 	= 30;
-		$snoopy->agent 			= "Mozilla/5.0 (compatible; Konqueror/3.2; Linux 2.6.2) (KHTML, like Gecko)";
-
-		$snoopy->fetch($file);
-
-		$_updatedata = null;
-
-		if ($snoopy->status != 200 || $snoopy->error) {
-			$_updatedata = new stdClass();
-			$_updatedata->failed = 1;
-			$_updatedata->installedversion = $installedversion;
+			//in table
+			$updatedata->versiondetail		= $xml->versiondetail;
+			$updatedata->date				= JEMOutput::formatdate($xml->date);
+			$updatedata->info 				= $xml->info;
+			$updatedata->download 			= $xml->download;
+			$updatedata->notes				= $xml->notes;
+			$updatedata->changes 			= explode(';', $xml->changes);
+			$updatedata->failed 			= 0;
+			$updatedata->installedversion	= $installedversion;
+			$updatedata->current			= version_compare($installedversion, $updatedata->version);
 		} else {
-			$data = explode('|', $snoopy->results);
-
-			$_updatedata = new stdClass();
-
-			/* version to check, not visible in table */
-			$_updatedata->version 		= $data[0];
-
-			/* in table */
-			$_updatedata->versiondetail	= $data[1];
-			$_updatedata->date			= JEMOutput::formatdate($data[2]);
-			$_updatedata->info 			= $data[3];
-			$_updatedata->download 		= $data[4];
-			$_updatedata->notes			= $data[5];
-			$_updatedata->changes 		= explode(';', $data[6]);
-			$_updatedata->failed 		= 0;
-			$_updatedata->installedversion 		= $installedversion;
-
-			$_updatedata->current = version_compare($installedversion, $_updatedata->version);
+			$updatedata->failed 			= 1;
+			$updatedata->installedversion	= $installedversion;
 		}
 
-		return $_updatedata;
+		return $updatedata;
 	}
 
-
 	/**
-	 * get a variable from the manifest file (actually, from the manifest cache).
-	 * in this case it will be the installed version of jem
+	 * Check to see if update-file exists
 	 */
-	function getParam($name) {
-		$db = JFactory::getDbo();
-
-		$query = $db->getQuery(true);
-		$query->select(array('manifest_cache'));
-		$query->from('#__extensions');
-		$query->where(array('name = '.$db->quote('com_jem')));
-		$db->setQuery($query);
-
-		$manifest = json_decode($db->loadResult(), true);
-		return $manifest[ $name ];
+	function CheckFile($filename) {
+		$ext =  JFile::getExt($filename);
+		if ($ext == 'xml') {
+			if(@file_get_contents($filename,0,null,0,1)){
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
 	}
 }
 ?>

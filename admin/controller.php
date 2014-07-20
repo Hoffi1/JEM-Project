@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.6
+ * @version 1.9.7
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -34,10 +34,8 @@ class JEMController extends JControllerLegacy
 	 */
 	public function display($cachable = false, $urlparams = false)
 	{
-		require_once JPATH_COMPONENT.'/helpers/helper.php';
-
 		// Load the submenu.
-		// if no view found then refert to jem
+		// if no view found then refert to main
 
 		JEMHelperBackend::addSubmenu(JRequest::getCmd('view', 'main'));
 
@@ -47,24 +45,13 @@ class JEMController extends JControllerLegacy
 
 
 	/**
-	 * @todo check code
-	 * Function to clear recurrences, not used
-	 */
-	function clearrecurrences()
-	{
-		$model = $this->getModel('events');
-		$model->clearrecurrences();
-		$this->setRedirect('index,php?option=com_jem', Jtext::_('COM_JEM_RECURRENCES_CLEARED'));
-	}
-
-	/**
 	 * Delete attachment
 	 *
 	 * @return true on sucess
 	 * @access private
 	 *
 	 * Views:
-	 * category, event, venue
+	 * event, venue
 	 *
 	 * Reference to the task is located in the attachments.js
 	 *

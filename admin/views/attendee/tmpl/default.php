@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.6
+ * @version 1.9.7
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -16,7 +16,7 @@ $selectuser_link = JRoute::_('index.php?option=com_jem&task=attendee.selectuser&
 
 <script type="text/javascript">
 
-	function elSelectUser(id, username)
+	function modalSelectUser(id, username)
 	{
 		$('uid').value = id;
 		$('username').value = username;
