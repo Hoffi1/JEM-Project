@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.6
+ * @version 1.9.7
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -89,15 +89,6 @@ if ($this->updatedata->failed == 0) {
 		  		</td>
 			</tr>
 		</table>
-
-		<br />
-		<table style="width:200px;" class="adminlist">
-			<tr>
-		  		<td><b><?php echo JText::_('COM_JEM_UPDATECHECK_INSTALLED_VERSION').':'; ?></b></td>
-		  		<td><?php echo $this->updatedata->installedversion; ?>
-		  		</td>
-			</tr>
-			</table>
 <?php
 } else {
 ?>
@@ -118,6 +109,15 @@ if ($this->updatedata->failed == 0) {
 <?php
 }
 ?>
+<br />
+		<table style="width:200px;" class="adminlist">
+			<tr>
+		  		<td><b><?php echo JText::_('COM_JEM_UPDATECHECK_INSTALLED_VERSION').':'; ?></b></td>
+		  		<td><?php echo $this->updatedata->installedversion; ?>
+		  		</td>
+			</tr>
+			</table>
+
 <input type="hidden" name="task" value="" />
 <?php echo JHtml::_('form.token'); ?>
 </form>

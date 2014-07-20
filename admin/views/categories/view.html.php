@@ -1,6 +1,6 @@
 <?php
 /**
- * @version     1.9.6
+ * @version     1.9.7
  * @package     JEM
  * @copyright   Copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright   Copyright (C) 2005-2009 Christoph Lukes
@@ -69,9 +69,6 @@ class JemViewCategories extends JViewLegacy
 		$canDo		= null;
 		$user		= JFactory::getUser();
 
- 		// Load the category helper.
-		require_once JPATH_COMPONENT.'/helpers/helper.php';
-
 		// Get the results for each action.
 		$canDo = JEMHelperBackend::getActions(0);
 
@@ -98,8 +95,7 @@ class JemViewCategories extends JViewLegacy
 		}
 
 		if ($this->state->get('filter.published') == -2 && $canDo->get('core.delete')) {
-			/*JToolBarHelper::deleteList('', 'categories.delete', 'JTOOLBAR_EMPTY_TRASH');*/
-			JToolBarHelper::deleteList('', 'categories.remove', 'JTOOLBAR_EMPTY_TRASH');
+			JToolBarHelper::deleteList('COM_JEM_CONFIRM_DELETE', 'categories.remove', 'JTOOLBAR_EMPTY_TRASH');
 		}
 		elseif ($canDo->get('core.edit.state')) {
 			JToolBarHelper::trash('categories.trash');

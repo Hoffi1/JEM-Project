@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.6
+ * @version 1.9.7
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -49,14 +49,11 @@ defined('_JEXEC') or die;
 			return false;
 		}
 
-		JHtml::_('behavior.framework');
-
 		// Load css
 		JHtml::_('stylesheet', 'com_jem/backend.css', array(), true);
 
 		// Add Scripts
 		$document->addScript('http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js');
-		$document->addCustomTag('<script type="text/javascript">jQuery.noConflict();</script>');
 
 		if ($highlighter) {
 			$document->addScript($url.'media/com_jem/js/highlighter.js');
@@ -77,7 +74,7 @@ defined('_JEXEC') or die;
 		$filters[] = JHtml::_('select.option', '3', JText::_('COM_JEM_STATE'));
 		$filters[] = JHtml::_('select.option', '4', JText::_('COM_JEM_COUNTRY'));
 		$filters[] = JHtml::_('select.option', '5', JText::_('JALL'));
-		$lists['filter'] = JHtml::_('select.genericlist', $filters, 'filter', 'size="1" class="inputbox"', 'value', 'text', $this->state->get('filter'));
+		$lists['filter'] = JHtml::_('select.genericlist', $filters, 'filter', array('size'=>'1','class'=>'inputbox'), 'value', 'text', $this->state->get('filter'));
 
 		//assign data to template
 		$this->lists = $lists;
@@ -95,7 +92,6 @@ defined('_JEXEC') or die;
 	 */
 	protected function addToolbar()
 	{
-		require_once JPATH_COMPONENT . '/helpers/helper.php';
 		JToolBarHelper::title(JText::_('COM_JEM_VENUES'), 'venues');
 
 		$canDo = JEMHelperBackend::getActions(0);

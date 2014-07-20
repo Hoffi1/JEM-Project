@@ -412,7 +412,7 @@
 		<fieldset name="evvenues"
 			label="COM_JEM_VENUES"
 		>
-			<field name="event_show_locdescription" type="radio"
+			<field name="event_show_locdescription" type="list"
 				label="COM_JEM_DISPLAY_VENUE_DESCRIPT"
 				description="COM_JEM_DISPLAY_VENUE_DESCRIPT_DESC"
 				class="inputbox"
@@ -422,7 +422,7 @@
 				<option value="0">JHIDE</option>
 				<option value="1">JSHOW</option>
 			</field>
-			<field name="event_show_detailsadress" type="radio"
+			<field name="event_show_detailsadress" type="list"
 				label="COM_JEM_DISPLAY_ADDRESS"
 				description="COM_JEM_DISPLAY_ADDRESS_DESC"
 				class="inputbox"
@@ -453,6 +453,7 @@
 				<option value="0">COM_JEM_NO_MAP_SERVICE</option>
 				<option value="1">COM_JEM_GOOGLE_MAP_LINK</option>
 				<option value="2">COM_JEM_GOOGLE_MAP_DISP</option>
+				<option value="3">COM_JEM_GOOGLE_MAP_DISP_API</option>
 			</field>
 			<field name="event_tld" type="text"
 				label="COM_JEM_GOOGLE_MAP_TLD"

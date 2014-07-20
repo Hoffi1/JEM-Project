@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.6
+ * @version 1.9.7
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -104,7 +104,7 @@ class JEMModelVenue extends JModelAdmin
 			$item->attachments = $files;
 		}
 
-		$item->author_ip = $jemsettings->storeip ? getenv('REMOTE_ADDR') : 'DISABLED';
+		$item->author_ip = $jemsettings->storeip ? JemHelper::retrieveIP() : false;
 
 		if (empty($item->id)) {
 			$item->country = $jemsettings->defaultCountry;

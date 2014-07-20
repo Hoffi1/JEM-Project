@@ -1,6 +1,6 @@
 <?php
 /**
- * @version     1.9.6
+ * @version     1.9.7
  * @package     JEM
  * @copyright   Copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright   Copyright (C) 2005-2009 Christoph Lukes
@@ -51,7 +51,7 @@ class JemViewCategory extends JViewLegacy
 		$grouplist[] 	= JHtml::_('select.option', '0', JText::_('COM_JEM_CATEGORY_NO_GROUP'));
 		$grouplist 		= array_merge($grouplist, $groups);
 
-		$Lists['groups']	= JHtml::_('select.genericlist', $grouplist, 'groupid', 'size="1" class="inputbox"', 'value', 'text', $this->item->groupid);
+		$Lists['groups']	= JHtml::_('select.genericlist', $grouplist, 'groupid', array('size'=>'1','class'=>'inputbox'), 'value', 'text', $this->item->groupid);
 		$this->Lists 		= $Lists;
 
 
@@ -71,9 +71,6 @@ class JemViewCategory extends JViewLegacy
 
 		$isNew		= ($this->item->id == 0);
 		$checkedOut	= !($this->item->checked_out == 0 || $this->item->checked_out == $userId);
-
-		// Load the category helper.
-		require_once JPATH_COMPONENT.'/helpers/helper.php';
 
 		// Get the results for each action.
 		$canDo = JEMHelperBackend::getActions();

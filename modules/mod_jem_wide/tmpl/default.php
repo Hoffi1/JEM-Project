@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.6
+ * @version 1.9.7
  * @package JEM
  * @subpackage JEM Wide Module
  * @copyright (C) 2013-2014 joomlaeventmanager.net
@@ -56,15 +56,7 @@ JHtml::_('behavior.modal', 'a.flyermodal');
 		</td>
 		<td>
 			<span class="category">
-				<?php if ($item->categorylink) : ?>
-				<a href="<?php echo $item->categorylink; ?>" title="<?php echo $item->catname; ?>">
-				<?php endif; ?>
-
 					<?php echo $item->catname; ?>
-
-				<?php if ($item->categorylink) : ?>
-				</a>
-				<?php endif; ?>
 			</span>
 		</td>
 		<td>

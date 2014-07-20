@@ -11,9 +11,17 @@ Johann Burkard
 <http://johannburkard.de>
 <mailto:jb@eaio.com>
 
+To highlight all occurrances of "bla" (case insensitive) in all li elements, use the following code:
+	$('li').highlight('bla');
+
+Remove highlighting
+	The highlight can be removed from any element with the removeHighlight function.
+	In this example, all highlights under the element with the ID highlight-plugin are removed.
+
+	$('#highlight-plugin').removeHighlight();
 */
 
-jQuery.fn.highlight = function(pat) {
+$.fn.highlight = function(pat) {
 	function innerHighlight(node, pat) {
 		var skip = 0;
 		if (node.nodeType == 3) {
@@ -41,7 +49,7 @@ jQuery.fn.highlight = function(pat) {
 	}) : this;
 };
 
-jQuery.fn.removeHighlight = function() {
+$.fn.removeHighlight = function() {
 	return this.find("span.highlight").each(function() {
 		this.parentNode.firstChild.nodeName;
 		with (this.parentNode) {
@@ -52,133 +60,142 @@ jQuery.fn.removeHighlight = function() {
 };
 
 function highlightevents() {
-	var elements = $('seach_in_here');
-	var g = $('filter');
-	var filtertext = g.options[g.selectedIndex].text.toLowerCase();
-	var filtervalue = g.options[g.selectedIndex].value;
+	var searcharea = $("#search_in_here");
+	var g 		   = $("#filter option:selected"); // selected option
+	var indexnr	   = g.index(); // shows nr of filter
+	var indextext  = g.text(); // reads text of filter
+	var lowerCase  = g.text().toLowerCase();
 
-	switch(filtervalue)
+	switch(indexnr)
 	{
-	case '1':
+	case 0:
 		var filter = 'eventtitle';
 		break;
-	case '2':
+	case 1:
+		var filter = 'venue';
+		break;
+	case 2:
 		var filter = 'city';
 		break;
-	case '3':
-		var filter = 'state';
-		break;
-	case '4':
-		var filter = 'country';
-		break;
-	case '5':
+	case 3:
 		var filter = 'category';
 		break;
-	case '6':
+	case 4:
+		var filter = 'state';
+		break;
+	case 5:
+		var filter = 'country';
+		break;
+	case 6:
 		alleventfilters();
 		break;
 	}
 
-	var newtext = $('filter_search').value;
+	var newtext = $("#filter_search").val();
 	var newtext2 = "td."+ filter +":contains(" + newtext + ")";
 
-	elements.getElements(newtext2).addClass('red');
-	jQuery(elements.getElements(newtext2)).highlight(newtext);
+	if (filter && newtext) {
+		searcharea.find(newtext2).addClass('red');
+		$(searcharea.find(newtext2)).highlight(newtext);
+	}
 }
 
 function alleventfilters() {
-	var elements = $('seach_in_here');
+	var searcharea 	= $("#search_in_here");
+	var keyword		= $("#filter_search").val();
+	var title		= 'eventtitle';
+	var venue		= 'venue';
+	var city		= 'city';
+	var state		= 'state';
+	var country		= 'country';
+	var category	= 'category';
 
-	var title = 'eventtitle';
-	var city = 'city';
-	var state = 'state';
-	var country = 'country';
-	var category = 'category';
+	if (keyword) {
+		var titleparameter	= "td."+ title +":contains(" + keyword + ")";
+		searcharea.find(titleparameter).addClass('red');
+		$(searcharea.find(titleparameter)).highlight(keyword);
 
-	var titlekeyword = $('filter_search').value;
-	var titleparameter = "td."+ title +":contains(" + titlekeyword + ")";
-	elements.getElements(titleparameter).addClass('red');
-	jQuery(elements.getElements(titleparameter)).highlight(titlekeyword);
+		var venueparameter = "td."+ venue +":contains(" + keyword + ")";
+		searcharea.find(venueparameter).addClass('red');
+		$(searcharea.find(venueparameter)).highlight(keyword);
 
-	var citykeyword = $('filter_search').value;
-	var cityparameter = "td."+ city +":contains(" + citykeyword + ")";
-	elements.getElements(cityparameter).addClass('red');
-	jQuery(elements.getElements(cityparameter)).highlight(citykeyword);
+		var cityparameter	= "td."+ city +":contains(" + keyword + ")";
+		searcharea.find(cityparameter).addClass('red');
+		$(searcharea.find(cityparameter)).highlight(keyword);
 
-	var statekeyword = $('filter_search').value;
-	var stateparameter = "td."+ state +":contains(" + statekeyword + ")";
-	elements.getElements(stateparameter).addClass('red');
-	jQuery(elements.getElements(stateparameter)).highlight(statekeyword);
+		var stateparameter	= "td."+ state +":contains(" + keyword + ")";
+		searcharea.find(stateparameter).addClass('red');
+		$(searcharea.find(stateparameter)).highlight(keyword);
 
-	var countrykeyword = $('filter_search').value;
-	var countryparameter = "td."+ country +":contains(" + countrykeyword + ")";
-	elements.getElements(countryparameter).addClass('red');
-	jQuery(elements.getElements(countryparameter)).highlight(countrykeyword);
-	
-	var categorykeyword = $('filter_search').value;
-	var categoryparameter = "td."+ category +":contains(" + categorykeyword + ")";
-	elements.getElements(categoryparameter).addClass('red');
-	jQuery(elements.getElements(categoryparameter)).highlight(categorykeyword);
+		var countryparameter = "td."+ country +":contains(" + keyword + ")";
+		searcharea.find(countryparameter).addClass('red');
+		$(searcharea.find(countryparameter)).highlight(keyword);
+
+		var categoryparameter = "td."+ category +":contains(" + keyword + ")";
+		searcharea.find(categoryparameter).addClass('red');
+		$(searcharea.find(categoryparameter)).highlight(keyword);
+	}
 }
 
 
 function highlightvenues() {
-	var elements = $('seach_in_here');
-	var g = $('filter');
-	var filtertext = g.options[g.selectedIndex].text.toLowerCase();
-	var filtervalue = g.options[g.selectedIndex].value;
+	var searcharea	= $("#search_in_here");
+	var g 			= $("#filter option:selected"); // selected option
+	var indexnr	   = g.index(); // shows nr of filter
+	var indextext  = g.text(); // reads text of filter
+	var lowerCase  = g.text().toLowerCase();
 
-	switch(filtervalue)
+	switch(indexnr)
 	{
-	case '1':
+	case 0:
 		var filter = 'venue';
 		break;
-	case '2':
+	case 1:
 		var filter = 'city';
 		break;
-	case '3':
+	case 2:
 		var filter = 'state';
 		break;
-	case '4':
+	case 3:
 		var filter = 'country';
 		break;
-	case '5':
+	case 4:
 		allvenuefilters();
 		break;
 	}
 
-	var newtext = $('filter_search').value;
+	var newtext = $("#filter_search").val();
 	var newtext2 = "td."+ filter +":contains(" + newtext + ")";
 
-	elements.getElements(newtext2).addClass('red');
-	jQuery(elements.getElements(newtext2)).highlight(newtext);
+	if (filter && newtext) {
+		searcharea.find(newtext2).addClass('red');
+		$(searcharea.find(newtext2)).highlight(newtext);
+	}
 }
 
 function allvenuefilters() {
-	var elements = $('seach_in_here');
+	var searcharea	= $("#search_in_here");
+	var keyword		= $("#filter_search").val();
+	var title		= 'venue';
+	var city		= 'city';
+	var state		= 'state';
+	var country		= 'country';
 
-	var title = 'venue';
-	var city = 'city';
-	var state = 'state';
-	var country = 'country';
+	if (keyword) {
+		var titleparameter = "td."+ title +":contains(" + keyword + ")";
+		searcharea.find(titleparameter).addClass('red');
+		$(searcharea.find(titleparameter)).highlight(keyword);
 
-	var titlekeyword = $('filter_search').value;
-	var titleparameter = "td."+ title +":contains(" + titlekeyword + ")";
-	elements.getElements(titleparameter).addClass('red');
-	jQuery(elements.getElements(titleparameter)).highlight(titlekeyword);
+		var cityparameter = "td."+ city +":contains(" + keyword + ")";
+		searcharea.find(cityparameter).addClass('red');
+		$(searcharea.find(cityparameter)).highlight(keyword);
 
-	var citykeyword = $('filter_search').value;
-	var cityparameter = "td."+ city +":contains(" + citykeyword + ")";
-	elements.getElements(cityparameter).addClass('red');
-	jQuery(elements.getElements(cityparameter)).highlight(citykeyword);
+		var stateparameter = "td."+ state +":contains(" + keyword + ")";
+		searcharea.find(stateparameter).addClass('red');
+		$(searcharea.find(stateparameter)).highlight(keyword);
 
-	var statekeyword = $('filter_search').value;
-	var stateparameter = "td."+ state +":contains(" + statekeyword + ")";
-	elements.getElements(stateparameter).addClass('red');
-	jQuery(elements.getElements(stateparameter)).highlight(statekeyword);
-
-	var countrykeyword = $('filter_search').value;
-	var countryparameter = "td."+ country +":contains(" + countrykeyword + ")";
-	elements.getElements(countryparameter).addClass('red');
-	jQuery(elements.getElements(countryparameter)).highlight(countrykeyword);
+		var countryparameter = "td."+ country +":contains(" + keyword + ")";
+		searcharea.find(countryparameter).addClass('red');
+		$(searcharea.find(countryparameter)).highlight(keyword);
+	}
 }
