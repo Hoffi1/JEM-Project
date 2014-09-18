@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.7
+ * @version 2.0.0
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -31,11 +31,13 @@ class JemModelVenues extends JemModelEventslist
 		$task           = $jinput->get('task','','cmd');
 
 		// List state information
-		$limitstart = JRequest::getInt('limitstart');
-		$this->setState('list.start', $limitstart);
-
 		$limit		= JRequest::getInt('limit', $params->get('display_venues_num'));
 		$this->setState('list.limit', $limit);
+
+		$limitstart = JRequest::getInt('limitstart');
+		// correct start value if required
+		$limitstart = $limit ? (int)(floor($limitstart / $limit) * $limit) : 0;
+		$this->setState('list.start', $limitstart);
 
 		# params
 		$this->setState('params', $params);
@@ -43,7 +45,7 @@ class JemModelVenues extends JemModelEventslist
 		$this->setState('filter.published',1);
 
 		$this->setState('filter.access', true);
-		$this->setState('filter.groupby',array('l.id','l.venue'));
+		$this->setState('filter.groupby',array('l.id'));
 
 	}
 
@@ -91,7 +93,7 @@ class JemModelVenues extends JemModelEventslist
 		}
 
 		$query->where($where);
-		$query->group(array('l.id','l.venue'));
+		$query->group(array('l.id'));
 		$query->order(array('l.ordering', 'l.venue'));
 
 		return $query;
@@ -188,9 +190,9 @@ class JemModelVenues extends JemModelEventslist
 		$query->join('LEFT', '#__jem_categories AS c ON c.id = rel.catid');
 
 		# venue-id
-		$query->where('l.id= '. $id);
+		$query->where('l.id= '. $db->quote($id));
 		# state
-		$query->where('a.published= '.$state);
+		$query->where('a.published= '.$db->quote($state));
 
 
 		#####################
@@ -327,7 +329,7 @@ class JemModelVenues extends JemModelEventslist
 		$requestCategoryId = $this->getState('filter.req_catid');
 
 		if ($requestCategoryId) {
-			$query->where('c.id = '.$requestCategoryId);
+			$query->where('c.id = '.$db->quote($requestCategoryId));
 		}
 
 		###################
@@ -342,7 +344,7 @@ class JemModelVenues extends JemModelEventslist
 			if (stripos($search, 'id:') === 0) {
 				$query->where('c.id = '.(int) substr($search, 3));
 			} else {
-				$search = $db->Quote('%'.$db->escape($search, true).'%');
+				$search = $db->Quote('%'.$db->escape($search, true).'%', false);
 
 				if ($search && $settings->get('global_show_filter')) {
 					if ($filter == 4) {

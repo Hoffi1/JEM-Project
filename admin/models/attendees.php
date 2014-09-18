@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.7
+ * @version 2.0.0
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -66,6 +66,7 @@ class JEMModelAttendees extends JModelLegacy
 
 		$limit		= $app->getUserStateFromRequest( 'com_jem.attendees.limit', 'limit', $app->getCfg('list_limit'), 'int');
 		$limitstart = $app->getUserStateFromRequest( 'com_jem.attendees.limitstart', 'limitstart', 0, 'int' );
+		$limitstart = $limit ? (int)(floor($limitstart / $limit) * $limit) : 0;
 
 		$this->setState('limit', $limit);
 		$this->setState('limitstart', $limitstart);
@@ -170,7 +171,7 @@ class JEMModelAttendees extends JModelLegacy
 		// Filter by search in title
 		$filter = $app->getUserStateFromRequest( 'com_jem.attendees.filter', 'filter', '', 'int' );
 		$search = $app->getUserStateFromRequest( 'com_jem.attendees.filter_search', 'filter_search', '', 'string' );
-		$search = $db->Quote('%'.$db->escape($search, true).'%');
+		$search = $db->Quote('%'.$db->escape($search, true).'%', false);
 		$filter_waiting	= $app->getUserStateFromRequest( 'com_jem.attendees.waiting',	'filter_waiting',	0, 'int' );
 		$filter_order		= $app->getUserStateFromRequest( 'com_jem.attendees.filter_order', 		'filter_order', 	'u.username', 'cmd' );
 		$filter_order_Dir	= $app->getUserStateFromRequest( 'com_jem.attendees.filter_order_Dir',	'filter_order_Dir',	'', 'word' );
@@ -187,7 +188,7 @@ class JEMModelAttendees extends JModelLegacy
 		$query->join('LEFT', '#__users AS u ON (u.id = r.uid)');
 
 
-		$query->where('r.event = '.$this->_id);
+		$query->where('r.event = '.$db->Quote($this->_id));
 
 
 		if ($filter_waiting) {

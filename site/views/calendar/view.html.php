@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.7
+ * @version 2.0.0
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -31,6 +31,8 @@ class JemViewCalendar extends JViewLegacy
 		$menuitem	= $menu->getActive();
 		$jemsettings = JemHelper::config();
 		$params 	= $app->getParams();
+		$top_category = $params->get('top_category', 0);
+		$this->param_topcat = $top_category > 0 ? ('&topcat='.$top_category) : '';
 
 		// Load css
 		JemHelper::loadCss('jem');
@@ -44,13 +46,11 @@ class JemViewCalendar extends JViewLegacy
 		$eventandmorecolor = $params->get('eventandmorecolor');
 
 		$style = '
-		div[id^=\'catz\'] a {
+		div#jem .eventcontentinner a,
+		div#jem .eventandmore a {
 			color:' . $evlinkcolor . ';
 		}
-		div[id^=\'catz\'] {
-			background-color:'.$evbackgroundcolor .';
-		}
-		.eventcontent {
+		.eventcontentinner {
 			background-color:'.$evbackgroundcolor .';
 		}
 		.eventandmore {
@@ -93,9 +93,9 @@ class JemViewCalendar extends JViewLegacy
 
 		//init calendar
 		$cal = new JEMCalendar($year, $month, 0, $app->getCfg('offset'));
-		$cal->enableMonthNav('index.php?view=calendar');
+		$cal->enableMonthNav('index.php?option=com_jem&view=calendar');
 		$cal->setFirstWeekDay($params->get('firstweekday', 1));
-		$cal->enableDayLinks(false);
+		$cal->enableDayLinks('index.php?option=com_jem&view=day' . $this->param_topcat);
 
 		$this->rows        = $rows;
 		$this->params      = $params;

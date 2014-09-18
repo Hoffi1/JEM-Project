@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.7
+ * @version 2.0.0
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -101,9 +101,22 @@ class JemModelDay extends JemModelEventslist
 		$requestCategoryId	= $jinput->getInt('catid',null);
 
 		$item = JRequest::getInt('Itemid');
+
 		$locid = $app->getUserState('com_jem.venuecal.locid'.$item);
 		if ($locid) {
 			$this->setstate('filter.filter_locid',$locid);
+		}
+
+		// maybe list of venue ids from calendar module
+		$locids = explode(',', $jinput->getString('locids', ''));
+		foreach ($locids as $id) {
+			if ((int)$id > 0) {
+				$venues[] = (int)$id;
+			}
+		}
+		if (!empty($venues)) {
+			$this->setstate('filter.venue_id', $venues);
+			$this->setstate('filter.venue_id.include', true);
 		}
 
 		$cal_category_catid = $app->getUserState('com_jem.categorycal.catid'.$item);
@@ -111,12 +124,35 @@ class JemModelDay extends JemModelEventslist
 			$this->setState('filter.req_catid',$cal_category_catid);
 		}
 
-		# limit/start
-		$limitstart = $app->getUserStateFromRequest('com_jem.day.'.$itemid.'.limitstart', 'limitstart', 0, 'int');
-		$this->setState('list.start', $limitstart);
+		// maybe list of venue ids from calendar module
+		$catids = explode(',', $jinput->getString('catids', ''));
+		foreach ($catids as $id) {
+			if ((int)$id > 1) { // don't accept 'root'
+				$cats[] = (int)$id;
+			}
+		}
+		if (!empty($cats)) {
+			$this->setstate('filter.category_id', $cats);
+			$this->setstate('filter.category_id.include', true);
+		}
 
-		$limit		= $app->getUserStateFromRequest('com_jem.day.'.$itemid.'.limit', 'limit', $jemsettings->display_num, 'int');
+		// maybe top category is given by calendar view
+		$top_category = $jinput->getInt('topcat', 0);
+		if ($top_category > 0) { // accept 'root'
+			$children = JEMCategories::getChilds($top_category);
+			if (count($children)) {
+				$where = 'rel.catid IN ('. implode(',', $children) .')';
+				$this->setState('filter.category_top', $where);
+			}
+		}
+
+		# limit/start
+		$limit = $app->getUserStateFromRequest('com_jem.day.'.$itemid.'.limit', 'limit', $jemsettings->display_num, 'int');
 		$this->setState('list.limit', $limit);
+
+		$limitstart = $app->getUserStateFromRequest('com_jem.day.'.$itemid.'.limitstart', 'limitstart', 0, 'int');
+		$limitstart = $limit ? (int)(floor($limitstart / $limit) * $limit) : 0;
+		$this->setState('list.start', $limitstart);
 
 		# Search
 		$search = $app->getUserStateFromRequest('com_jem.day.'.$itemid.'.filter_search', 'filter_search', '', 'string');
@@ -145,7 +181,19 @@ class JemModelDay extends JemModelEventslist
 		$this->setState('params', $params);
 
 		# published
-		$this->setState('filter.published',1);
+		$pub = explode(',', $jinput->getString('pub', 1));
+		$published = array();
+		// sanitize remote data
+		foreach ($pub as $val) {
+			if (((int)$val >= 1) && ((int)$val <= 2)) {
+				$published[] = (int)$val;
+			}
+		}
+		// default to 'published'
+		if (empty($published)) {
+			$published[] = 1;
+		}
+		$this->setState('filter.published', $published);
 
 		# request venue-id
 		if ($requestVenueId) {
@@ -197,11 +245,11 @@ class JemModelDay extends JemModelEventslist
 		$query = parent::getListQuery();
 
 		if ($requestVenueId){
-			$query->where(' a.locid = '.$requestVenueId);
+			$query->where(' a.locid = '.$this->_db->quote($requestVenueId));
 		}
 
 		// Second is to only select events of the specified day
-		$query->where('(\''.$this->_date.'\' BETWEEN (a.dates) AND (IF (a.enddates >= a.dates, a.enddates, a.dates)) OR \''.$this->_date.'\' = a.dates)');
+		$query->where('('.$this->_db->quote($this->_date).' BETWEEN (a.dates) AND (IF (a.enddates >= a.dates, a.enddates, a.dates)) OR '.$this->_db->quote($this->_date).' = a.dates)');
 
 		return $query;
 	}

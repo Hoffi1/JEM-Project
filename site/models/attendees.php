@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.7
+ * @version 2.0.0
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -70,6 +70,8 @@ class JEMModelAttendees extends JModelLegacy
 
 		$limit		= $app->getUserStateFromRequest( 'com_jem.attendees.limit', 'limit', $jemsettings->display_num, 'int');
 		$limitstart = $app->getUserStateFromRequest( 'com_jem.attendees.limitstart', 'limitstart', 0, 'int' );
+		// correct start value if required
+		$limitstart = $limit ? (int)(floor($limitstart / $limit) * $limit) : 0;
 
 		$this->setState('limit', $limit);
 		$this->setState('limitstart', $limitstart);
@@ -225,7 +227,7 @@ class JEMModelAttendees extends JModelLegacy
 
 		$where = array();
 
-		$where[] = 'r.event = '.$this->_id;
+		$where[] = 'r.event = '.$this->_db->Quote($this->_id);
 		if ($filter_waiting) {
 			$where[] = ' (a.waitinglist = 0 OR r.waiting = '.($filter_waiting-1).') ';
 		}
@@ -270,7 +272,7 @@ class JEMModelAttendees extends JModelLegacy
 	function getEvent()
 	{
 
-		$query = 'SELECT id, alias, title, dates, enddates, times, endtimes, maxplaces, waitinglist FROM #__jem_events WHERE id = '.$this->_id;
+		$query = 'SELECT id, alias, title, dates, enddates, times, endtimes, maxplaces, waitinglist FROM #__jem_events WHERE id = '.$this->_db->Quote($this->_id);
 
 		$this->_db->setQuery( $query );
 

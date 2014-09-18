@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.7
+ * @version 2.0.0
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -35,10 +35,12 @@ class JemViewDay extends JEMView
 		$menu 			= $app->getMenu();
 		$menuitem 		= $menu->getActive();
 		$user			= JFactory::getUser();
+		$document 		= JFactory::getDocument();
 		$params 		= $app->getParams();
-		$db 			= JFactory::getDBO();
+	//	$db 			= JFactory::getDBO();
 		$uri 			= JFactory::getURI();
 		$task 			= JRequest::getWord('task');
+		$print			= JRequest::getBool('print');
 		$pathway 		= $app->getPathWay();
 		$jinput 		= $app->input;
 
@@ -57,13 +59,17 @@ class JemViewDay extends JEMView
 		JemHelper::loadCustomCss();
 		JemHelper::loadCustomTag();
 
+		if ($print) {
+			JemHelper::loadCss('print');			
+			$document->setMetaData('robots', 'noindex, nofollow');
+		}
+
 		// get variables
 		$itemid 			= JRequest::getInt('id', 0) . ':' . JRequest::getInt('Itemid', 0);
 		$filter_order		= $app->getUserStateFromRequest('com_jem.day.'.$itemid.'.filter_order', 'filter_order', 	'a.dates', 'cmd');
 		$filter_order_Dir	= $app->getUserStateFromRequest('com_jem.day.'.$itemid.'.filter_order_Dir', 'filter_order_Dir',	'', 'word');
 		$filter_type		= $app->getUserStateFromRequest('com_jem.day.'.$itemid.'.filter_type', 'filter_type', '', 'int');
 		$search 			= $app->getUserStateFromRequest('com_jem.day.'.$itemid.'.filter_search', 'filter_search', '', 'string');
-		$search 			= $db->escape(trim(JString::strtolower($search)));
 
 		// table ordering
 		$lists['order_Dir'] = $filter_order_Dir;
@@ -107,13 +113,13 @@ class JemViewDay extends JEMView
 		}
 
 		if ($requestVenueId){
-			$print_link = JRoute::_('index.php?view=day&tmpl=component&print=1&locid='.$requestVenueId.'&id='.$requestDate);
+			$print_link = JRoute::_('index.php?option=com_jem&view=day&tmpl=component&print=1&locid='.$requestVenueId.'&id='.$requestDate);
 		}
 		elseif ($requestCategoryId){
-			$print_link = JRoute::_('index.php?view=day&tmpl=component&print=1&catid='.$requestCategoryId.'&id='.$requestDate);
+			$print_link = JRoute::_('index.php?option=com_jem&view=day&tmpl=component&print=1&catid='.$requestCategoryId.'&id='.$requestDate);
 		}
 		else /*(!$requestCategoryId && !$requestVenueId)*/ {
-			$print_link = JRoute::_('index.php?view=day&tmpl=component&print=1&id='.$requestDate);
+			$print_link = JRoute::_('index.php?option=com_jem&view=day&tmpl=component&print=1&id='.$requestDate);
 		}
 
 		//Check if the user has access to the form

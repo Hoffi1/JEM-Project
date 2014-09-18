@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.7
+ * @version 2.0.0
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -64,15 +64,17 @@ class JemModelEventslist extends JModelList
 		$itemid				= JRequest::getInt('id', 0) . ':' . JRequest::getInt('Itemid', 0);
 
 		# limit/start
-		$value	= $app->getUserStateFromRequest('com_jem.eventslist.'.$itemid.'.limit', 'limit', $jemsettings->display_num, 'int');
-		$this->setState('list.limit', $value);
+		$limit	= $app->getUserStateFromRequest('com_jem.eventslist.'.$itemid.'.limit', 'limit', $jemsettings->display_num, 'int');
+		$this->setState('list.limit', $limit);
 
-		$value = $app->getUserStateFromRequest('com_jem.eventslist.'.$itemid.'.limitstart', 'limitstart', 0, 'int');
-		$this->setState('list.start', $value);
+		$limitstart = $app->getUserStateFromRequest('com_jem.eventslist.'.$itemid.'.limitstart', 'limitstart', 0, 'int');
+		// correct start value if required
+		$limitstart = $limit ? (int)(floor($limitstart / $limit) * $limit) : 0;
+		$this->setState('list.start', $limitstart);
 
 		# Search - variables
 		$search = $app->getUserStateFromRequest('com_jem.eventslist.'.$itemid.'.filter_search', 'filter_search', '', 'string');
-		$this->setState('filter.filter_search', $search);
+		$this->setState('filter.filter_search', $search); // must be escaped later
 
 		$filtertype = $app->getUserStateFromRequest('com_jem.eventslist.'.$itemid.'.filter_type', 'filter_type', '', 'int');
 		$this->setState('filter.filter_type', $filtertype);
@@ -89,9 +91,11 @@ class JemModelEventslist extends JModelList
 
 		$user = JFactory::getUser();
 
-		if ($params->get('showopendates') == 1) {
-			$this->setState('filter.opendate',1);
-		}
+		###############
+		## opendates ##
+		###############
+		
+		$this->setState('filter.opendates', $params->get('showopendates', 0));
 
 		###########
 		## ORDER ##
@@ -173,7 +177,7 @@ class JemModelEventslist extends JModelList
 		// Compile the store id.
 		$id .= ':' . serialize($this->getState('filter.published'));
 		$id .= ':' . $this->getState('filter.access');
-		$id .= ':' . $this->getState('filter.opendate');
+		$id .= ':' . $this->getState('filter.opendates');
 		$id .= ':' . $this->getState('filter.featured');
 		$id .= ':' . serialize($this->getState('filter.event_id'));
 		$id .= ':' . $this->getState('filter.event_id.include');
@@ -332,8 +336,8 @@ class JemModelEventslist extends JModelList
 		#############################
 		## FILTER - CALENDAR_DATES ##
 		#############################
-		$cal_from	= $this->setState('filter.calendar_from');
-		$cal_to		= $this->setState('filter.calendar_to');
+		$cal_from	= $this->getState('filter.calendar_from');
+		$cal_to		= $this->getState('filter.calendar_to');
 
 		if ($cal_from) {
 			$query->where($cal_from);
@@ -341,6 +345,23 @@ class JemModelEventslist extends JModelList
 
 		if ($cal_to) {
 			$query->where($cal_to);
+		}
+
+		#############################
+		## FILTER - OPEN_DATES     ##
+		#############################
+		$opendates	= $this->getState('filter.opendates');
+
+		switch ($opendates) {
+		case 0: // don't show events without start date
+		default:
+			$query->where('a.dates IS NOT NULL');
+			break;
+		case 1: // show all events, with or without start date
+			break;
+		case 2: // show only events without startdate
+			$query->where('a.dates IS NULL');
+			break;
 		}
 
 		#####################
@@ -357,9 +378,26 @@ class JemModelEventslist extends JModelList
 		####################
 		$filter_locid = $this->getState('filter.filter_locid');
 		if ($filter_locid) {
-			$query->where('a.locid = '.$filter_locid);
+			$query->where('a.locid = '.(int)$filter_locid);
 		}
+		
+		
+		####################
+		## FILTER - VENUE ##
+		####################
 
+		$venueId = $this->getState('filter.venue_id');
+
+		if (is_numeric($venueId)) {
+			$type = $this->getState('filter.venue_id.include', true) ? '= ' : '<> ';
+			$query->where('l.id '.$type.(int) $venueId);
+		}
+		elseif (is_array($venueId) && !empty($venueId)) {
+			JArrayHelper::toInteger($venueId);
+			$venueId = implode(',', $venueId);
+			$type = $this->getState('filter.venue_id.include', true) ? 'IN' : 'NOT IN';
+			$query->where('l.id '.$type.' ('.$venueId.')');
+		}
 
 		###################
 		## FILTER-SEARCH ##
@@ -367,13 +405,13 @@ class JemModelEventslist extends JModelList
 
 		# define variables
 		$filter = $this->getState('filter.filter_type');
-		$search = $this->getState('filter.filter_search');
+		$search = $this->getState('filter.filter_search'); // not escaped
 
 		if (!empty($search)) {
 			if (stripos($search, 'id:') === 0) {
 				$query->where('a.id = '.(int) substr($search, 3));
 			} else {
-				$search = $db->Quote('%'.$db->escape($search, true).'%');
+				$search = $db->Quote('%'.$db->escape($search, true).'%', false); // escape once
 
 				if($search && $settings->get('global_show_filter')) {
 					switch($filter) {
@@ -418,6 +456,10 @@ class JemModelEventslist extends JModelList
 	public function getItems()
 	{
 		$items	= parent::getItems();
+
+		if (empty($items)) {
+			return array();
+		}
 
 		$user	= JFactory::getUser();
 		$userId	= $user->get('id');
@@ -483,10 +525,9 @@ class JemModelEventslist extends JModelList
 		if ($items) {
 			$items = JemHelper::getAttendeesNumbers($items);
 
-		if ($calendarMultiday) {
-			$items = self::calendarMultiday($items);
-		}
-
+			if ($calendarMultiday) {
+				$items = self::calendarMultiday($items);
+			}
 		}
 
 		return $items;
@@ -606,39 +647,19 @@ class JemModelEventslist extends JModelList
 			$query->where('c.id = '.$requestCategoryId);
 		}
 
-
-		####################
-		## FILTER - VENUE ##
-		####################
-
-		$venueId = $this->getState('filter.venue_id');
-
-		if (is_numeric($venueId)) {
-			$type = $this->getState('filter.venue_id.include', true) ? '= ' : '<> ';
-			$query->where('l.id '.$type.(int) $venueId);
-		}
-		elseif (is_array($venueId) && !empty($venueId)) {
-			JArrayHelper::toInteger($venueId);
-			$venueId = implode(',', $venueId);
-			$type = $this->getState('filter.venue_id.include', true) ? 'IN' : 'NOT IN';
-			$query->where('l.id '.$type.' ('.$venueId.')');
-		}
-
-
-
 		###################
 		## FILTER-SEARCH ##
 		###################
 
 		# define variables
 		$filter = $this->getState('filter.filter_type');
-		$search = $this->getState('filter.filter_search');
+		$search = $this->getState('filter.filter_search'); // not escaped
 
 		if (!empty($search)) {
 			if (stripos($search, 'id:') === 0) {
 				$query->where('c.id = '.(int) substr($search, 3));
 			} else {
-				$search = $db->Quote('%'.$db->escape($search, true).'%');
+				$search = $db->Quote('%'.$db->escape($search, true).'%', false); // escape once
 
 				if($search && $settings->get('global_show_filter')) {
 					if ($filter == 4) {
@@ -667,7 +688,7 @@ class JemModelEventslist extends JModelList
 		$startdayonly	= $this->getState('filter.calendar_startdayonly');
 
 		foreach($items AS $item) {
-			if (!is_null($item->enddates) && $startdayonly) {
+			if (!is_null($item->enddates) && !$startdayonly) {
 				if ($item->enddates != $item->dates) {
 					$day = $item->start_day;
 
@@ -706,15 +727,16 @@ class JemModelEventslist extends JModelList
 								$multi[$counter]->times = $item->times;
 								$multi[$counter]->endtimes = $item->endtimes;
 							}
-							# add generated days to data
-							$items = array_merge($items, $multi);
 						}
-						# unset temp array holding generated days before working on the next multiday event
-						unset($multi);
-					}
+					} // for
+
+					# add generated days to data
+					$items = array_merge($items, $multi);
+					# unset temp array holding generated days before working on the next multiday event
+					unset($multi);
 				}
 			}
-		}
+		} // foreach
 
 		foreach ($items as $item) {
 			$time[] = $item->times;

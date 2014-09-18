@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.7
+ * @version 2.0.0
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -60,9 +60,8 @@ class JemViewVenue extends JEMView {
 			$eventandmorecolor = $params->get('eventandmorecolor');
 
 			$style = '
-			div[id^=\'catz\'] a {color:' . $evlinkcolor . ';}
-			div[id^=\'catz\'] {background-color:' . $evbackgroundcolor . ';}
-			.eventcontent {background-color:'.$evbackgroundcolor .';}
+			div#jem .eventcontentinner a, div#jem .eventandmore a {color:' . $evlinkcolor . ';}
+			.eventcontentinner {background-color:'.$evbackgroundcolor .';}
 			.eventandmore {background-color:' . $eventandmorecolor . ';}
 			.today .daynum {background-color:' . $currentdaycolor . ';}';
 			$document->addStyleDeclaration ($style);
@@ -97,17 +96,19 @@ class JemViewVenue extends JEMView {
 
 			// init calendar
 			$itemid = JRequest::getInt('Itemid');
-			$venueID = $params->get('id');
+			$venueID = $jinput->getInt('id', $params->get('id'));
 
 			$partItemid = ($itemid > 0) ? '&Itemid='.$itemid : '';
 			$partVenid = ($venueID > 0) ? '&id=' . $venueID : '';
+			$partLocid = ($venueID > 0) ? '&locid=' . $venueID : '';
 			$cal = new JEMCalendar($year, $month, 0, $app->getCfg('offset'));
-			$cal->enableMonthNav('index.php?view=venue&layout=calendar'.$partVenid.$partItemid);
+			$cal->enableMonthNav('index.php?option=com_jem&view=venue&layout=calendar'.$partVenid.$partItemid);
 			$cal->setFirstWeekDay($params->get('firstweekday',1));
-			$cal->enableDayLinks(false);
+			$cal->enableDayLinks('index.php?option=com_jem&view=day'.$partLocid);
 
 			// map variables
 			$this->rows 			= $rows;
+			$this->locid			= $venueID;
 			$this->params 			= $params;
 			$this->jemsettings 		= $jemsettings;
 			$this->cal 				= $cal;
@@ -122,11 +123,12 @@ class JemViewVenue extends JEMView {
 			$menuitem		= $menu->getActive();
 			$jemsettings 	= JemHelper::config();
 			$settings 		= JemHelper::globalattribs();
-			$db 			= JFactory::getDBO();
+	//		$db 			= JFactory::getDBO();
 			$params 		= $app->getParams('com_jem');
 			$pathway 		= $app->getPathWay ();
 			$uri 			= JFactory::getURI();
 			$task 			= JRequest::getWord('task');
+			$print			= JRequest::getBool('print');
 			$user			= JFactory::getUser();
 			$itemid 		= JRequest::getInt('id', 0) . ':' . JRequest::getInt('Itemid', 0);
 
@@ -134,6 +136,11 @@ class JemViewVenue extends JEMView {
 			JemHelper::loadCss('jem');
 			JemHelper::loadCustomCss();
 			JemHelper::loadCustomTag();
+
+			if ($print) {
+				JemHelper::loadCss('print');			
+				$document->setMetaData('robots', 'noindex, nofollow');
+			}
 
 			// get data from model
 			$rows	= $this->get('Items');
@@ -162,7 +169,6 @@ class JemViewVenue extends JEMView {
 			$filter_order_Dir = $app->getUserStateFromRequest('com_jem.venue.'.$itemid.'.filter_order_Dir', 'filter_order_Dir', $filter_order_DirDefault, 'word');
 			$filter_type      = $app->getUserStateFromRequest('com_jem.venue.'.$itemid.'.filter_type', 'filter_type', '', 'int');
 			$search           = $app->getUserStateFromRequest('com_jem.venue.'.$itemid.'.filter_search', 'filter_search', '', 'string');
-			$search           = $db->escape(trim(JString::strtolower($search)));
 
 			// table ordering
 			$lists['order_Dir']	= $filter_order_Dir;

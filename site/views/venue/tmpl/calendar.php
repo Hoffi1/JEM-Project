@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.7
+ * @version 2.0.0
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -40,7 +40,7 @@ defined('_JEXEC') or die;
 
 		@$countperday[$year.$month.$day]++;
 		if ($countperday[$year.$month.$day] == $limit+1) {
-			$var1a = JRoute::_( 'index.php?view=day&id='.$year.$month.$day );
+			$var1a = JRoute::_( 'index.php?option=com_jem&view=day&id='.$year.$month.$day.(!empty($this->locid)?('&locid='.$this->locid):''));
 			$var1b = JText::_('COM_JEM_AND_MORE');
 			$var1c = "<a href=\"".$var1a."\">".$var1b."</a>";
 			$id = 'eventandmore';
@@ -106,7 +106,6 @@ defined('_JEXEC') or die;
 			}
 
 			//count occurence of the category
-
 			if (!isset($row->multi) || ($row->multi == 'first')) {
 				if (!array_key_exists($category->id, $countcatevents)) {
 					$countcatevents[$category->id] = 1;
@@ -164,7 +163,7 @@ defined('_JEXEC') or die;
 		//venue
 		if ($this->jemsettings->showlocate == 1) {
 			$venue  = '<div class="location"><span class="text-label">'.JText::_('COM_JEM_VENUE_SHORT').': </span>';
-			$venue .= $row->locid ? $this->escape($row->venue) : '-';
+			$venue .=     $row->locid ? $this->escape($row->venue) : '-';
 			$venue .= '</div>';
 		} else {
 			$venue = '';
@@ -188,9 +187,9 @@ defined('_JEXEC') or die;
 		$multidaydate .= '</div>';
 
 		//generate the output
-		$content .= $colorpic;
+		$content .= '<div class="eventcontentinner">' . $colorpic;
 		$content .= JemHelper::caltooltip($catname.$eventname.$timehtml.$venue, $eventdate, $row->title, $detaillink, 'editlinktip hasTip', $timetp, $category->color);
-		$content .= $contentend;
+		$content .= $contentend . '</div>';
 
 		$this->cal->setEventContent($year, $month, $day, $content);
 	endforeach;
