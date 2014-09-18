@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.7
+ * @version 2.0.0
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -40,7 +40,7 @@ defined('_JEXEC') or die;
 
 		@$countperday[$year.$month.$day]++;
 		if ($countperday[$year.$month.$day] == $limit+1) {
-			$var1a = JRoute::_( 'index.php?view=day&id='.$year.$month.$day.'&catid='.$this->catid);
+			$var1a = JRoute::_('index.php?option=com_jem&view=day&id='.$year.$month.$day.'&catid='.$this->catid);
 			$var1b = JText::_('COM_JEM_AND_MORE');
 			$var1c = "<a href=\"".$var1a."\">".$var1b."</a>";
 			$id = 'eventandmore';
@@ -120,10 +120,12 @@ defined('_JEXEC') or die;
 			}
 
 			//count occurence of the category
-			if (!array_key_exists($category->id, $countcatevents)) {
-				$countcatevents[$category->id] = 1;
-			} else {
-				$countcatevents[$category->id]++;
+			if (!isset($row->multi) || ($row->multi == 'first')) {
+				if (!array_key_exists($category->id, $countcatevents)) {
+					$countcatevents[$category->id] = 1;
+				} else {
+					$countcatevents[$category->id]++;
+				}
 			}
 		}
 
@@ -195,9 +197,9 @@ defined('_JEXEC') or die;
 		$multidaydate .= '</div>';
 
 		//generate the output
-		//$content .= $colorpic;
+		$content .= '<div class="eventcontentinner">'; // . $colorpic;
 		$content .= JemHelper::caltooltip($catname.$eventname.$timehtml.$venue, $eventdate, $row->title, $detaillink, 'editlinktip hasTip', $timetp, $category->color);
-		$content .= $contentend;
+		$content .= $contentend . '</div>';
 
 		$this->cal->setEventContent($year, $month, $day, $content);
 	endforeach;
@@ -205,6 +207,56 @@ defined('_JEXEC') or die;
 	// print the calendar
 	echo $this->cal->showMonth();
 	?>
+
+	<div id="jlcalendarlegend">
+
+	<!-- Calendar Legend -->
+		<div class="calendarLegends">
+			<?php
+			if ($this->params->get('displayLegend')) {
+
+				##############
+				## FOR EACH ##
+				##############
+
+				$counter	= array();
+				$cats		= array();
+
+				# walk through events
+				foreach ($this->rows as $row) {
+					foreach ($row->categories as $cat) {
+						# skip foreign categories - we are restricted to one
+						if ($cat->id != $this->catid) {
+							continue;
+						}
+
+						# sort out dupes for the counter (catid-legend)
+						if (!in_array($cat->id, $counter)) {
+							# add cat id to cat counter
+							$counter[] = $cat->id;
+
+							# build legend
+							if (array_key_exists($cat->id, $countcatevents)) {
+							?>
+								<div class="eventCat" id="cat<?php echo $cat->id; ?>">
+									<?php
+									if (isset($cat->color) && $cat->color) {
+										echo '<span class="colorpic" style="background-color: '.$cat->color.';"></span>';
+									}
+									echo $cat->catname.' ('.$countcatevents[$cat->id].')';
+									?>
+								</div>
+							<?php
+							}
+						}
+					}
+				}
+			}
+			?>
+		</div>
+	</div>
+
+	<div class="clr"></div>
 
 	<div class="copyright">
 		<?php echo JemOutput::footer(); ?>

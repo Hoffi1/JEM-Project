@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.7
+ * @version 2.0.0
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -199,7 +199,7 @@ class JemHelper {
 			//delete outdated events
 			if ($jemsettings->oldevent == 1) {
 				$query = 'DELETE FROM #__jem_events WHERE dates > 0 AND '
-						.' DATE_SUB(NOW(), INTERVAL '.$jemsettings->minus.' DAY) > (IF (enddates IS NOT NULL, enddates, dates))';
+						.' DATE_SUB(NOW(), INTERVAL '.(int)$jemsettings->minus.' DAY) > (IF (enddates IS NOT NULL, enddates, dates))';
 				$db->SetQuery($query);
 				$db->Query();
 			}
@@ -207,7 +207,7 @@ class JemHelper {
 			//Set state archived of outdated events
 			if ($jemsettings->oldevent == 2) {
 				$query = 'UPDATE #__jem_events SET published = 2 WHERE dates > 0 AND '
-						.' DATE_SUB(NOW(), INTERVAL '.$jemsettings->minus.' DAY) > (IF (enddates IS NOT NULL, enddates, dates)) '
+						.' DATE_SUB(NOW(), INTERVAL '.(int)$jemsettings->minus.' DAY) > (IF (enddates IS NOT NULL, enddates, dates)) '
 						.' AND published = 1';
 				$db->SetQuery($query);
 				$db->Query();
@@ -917,6 +917,25 @@ class JemHelper {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Returns array of positive numbers
+	 *
+	 * @param string comma separated list of ids
+	 * @return mixed array of numbers greater zero or false
+	 */
+	static function getValidIds($idstring)
+	{
+		$ids = array();
+		$tmp = explode(',', $idstring);
+		foreach ($tmp as $id) {
+			if ((int)$id > 0) {
+				$ids[] = (int)$id;
+			}
+		}
+
+		return (empty($ids) ? false : $ids);
 	}
 
 	/**

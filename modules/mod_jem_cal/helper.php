@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.7
+ * @version 2.0.0
  * @package JEM
  * @subpackage JEM Calendar Module
  * @copyright (C) 2013-2014 joomlaeventmanager.net
@@ -36,10 +36,10 @@ abstract class modjemcalqhelper
 
 		$user		= JFactory::getUser();
 		$levels		= $user->getAuthorisedViewLevels();
-		$settings 	= JEMHelper::globalattribs();
+		$settings 	= JemHelper::globalattribs();
 
-		$catid 				= trim($params->get('catid'));
-		$venid 				= trim($params->get('venid'));
+		$catids 			= JemHelper::getValidIds($params->get('catid'));
+		$venids 			= JemHelper::getValidIds($params->get('venid'));
 		$StraightToDetails	= $params->get('StraightToDetails', '1');
 		$DisplayCat			= $params->get('DisplayCat', '0');
 		$DisplayVenue		= $params->get('DisplayVenue', '0');
@@ -47,23 +47,20 @@ abstract class modjemcalqhelper
 		$CurrentEvents		= $params->get('CurrentEvents', '1');
 		$FixItemID			= $params->get('FixItemID', '0');
 		$defaultItemid	 	= $settings->get('default_Itemid','');
+		$daylinkparams		= ''; // collects additional params for link to day view
 
 		# filter category's
-		if ($catid) {
-			$ids = explode(',', $catid);
-			$ids = JArrayHelper::toInteger($ids);
-			//$categories = ' AND c.id IN (' . implode(',', $ids) . ')';
-			$model->setState('filter.category_id',$ids);
+		if ($catids) {
+			$model->setState('filter.category_id',$catids);
 			$model->setState('filter.category_id.include',true);
+			$daylinkparams .= '&catids=' . implode(',', $catids);
 		}
 
 		# filter venue's
-		if ($venid) {
-			$ids = explode(',', $venid);
-			$ids = JArrayHelper::toInteger($ids);
-			/*$venues = ' AND l.id IN (' . implode(',', $ids) . ')';*/
-			$model->setState('filter.venue_id',$ids);
+		if ($venids) {
+			$model->setState('filter.venue_id',$venids);
 			$model->setState('filter.venue_id.include',true);
+			$daylinkparams .= '&locids=' . implode(',', $venids);
 		}
 
 		# filter published
@@ -74,16 +71,17 @@ abstract class modjemcalqhelper
 
 		if ($CurrentEvents && $ArchivedEvents) {
 			$model->setState('filter.published',array(1,2));
+			$daylinkparams .= '&pub=1,2';
 		} else {
 			if ($CurrentEvents == 1) {
-				/*$wherestr = ' WHERE a.published = 1';*/
 				$model->setState('filter.published',1);
+				$daylinkparams .= '&pub=1';
 			}
 
 			# filter archived
 			if ($ArchivedEvents == 1) {
-			/*$wherestr = ' WHERE a.published = 2';*/
 				$model->setState('filter.published',2);
+				$daylinkparams .= '&pub=2';
 			}
 		}
 
@@ -191,15 +189,15 @@ abstract class modjemcalqhelper
 						if ($FixItemID == 0) {
 							if ($defaultItemid)
 							{
-								$evlink = 'index.php?option=com_jem&view=day&id='. $tdate.'&Itemid='.$defaultItemid;
+								$evlink = 'index.php?option=com_jem&view=day&id='. $tdate . $daylinkparams . '&Itemid='.$defaultItemid;
 							} else {
-								$evlink = 'index.php?option=com_jem&view=day&id='. $tdate;
+								$evlink = 'index.php?option=com_jem&view=day&id='. $tdate . $daylinkparams;
 							}
 							$link = JRoute::_($evlink);
 							//$link = JEMHelperRoute::getRoute($tdate, 'day');
 						} else {
 							//Create the link - copied from Jroute
-							$evlink = 'index.php?option=com_jem&view=day&id='. $tdate.'&Itemid='.$FixItemID;
+							$evlink = 'index.php?option=com_jem&view=day&id='. $tdate . $daylinkparams .'&Itemid='.$FixItemID;
 							$link = JRoute::_($evlink);
 						}
 					}

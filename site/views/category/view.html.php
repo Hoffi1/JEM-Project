@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.7
+ * @version 2.0.0
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -68,12 +68,14 @@ class JemViewCategory extends JEMView
 			$eventandmorecolor = $params->get('eventandmorecolor');
 
 			$style = '
-			div[id^=\'scat\'] a {color:' . $evlinkcolor . ';}
-			div[id^=\'scat\'] {background-color:'.$evbackgroundcolor .';}
-			.eventcontent {background-color:'.$evbackgroundcolor .';}
+			div#jem .eventcontentinner a, div#jem .eventandmore a {color:' . $evlinkcolor . ';}
+			.eventcontentinner {background-color:'.$evbackgroundcolor .';}
 			.eventandmore {background-color:'.$eventandmorecolor .';}
 			.today .daynum {background-color:'.$currentdaycolor.';}';
 			$document->addStyleDeclaration($style);
+
+			// add javascript (using full path - see issue #590)
+			JHtml::_('script', 'media/com_jem/js/calendar.js');
 
 			// Retrieve date variables
 			$year = (int)JRequest::getVar('yearID', strftime("%Y"));
@@ -115,7 +117,7 @@ class JemViewCategory extends JEMView
 			$cal = new JEMCalendar($year, $month, 0, $app->getCfg('offset'));
 			$cal->enableMonthNav('index.php?option=com_jem&view=category&layout=calendar' . $partCatid . $partItemid);
 			$cal->setFirstWeekDay($params->get('firstweekday', 1));
-			$cal->enableDayLinks(false);
+			$cal->enableDayLinks('index.php?option=com_jem&view=day&catid='.$catid);
 
 			$this->rows 			= $rows;
 			$this->catid 			= $catid;
@@ -131,8 +133,9 @@ class JemViewCategory extends JEMView
 			$document 		= JFactory::getDocument();
 			$jemsettings 	= JemHelper::config();
 			$settings 		= JemHelper::globalattribs();
-			$db  			= JFactory::getDBO();
+		//	$db  			= JFactory::getDBO();
 			$user			= JFactory::getUser();
+			$print			= JRequest::getBool('print');
 
 			JHtml::_('behavior.tooltip');
 
@@ -147,6 +150,11 @@ class JemViewCategory extends JEMView
 			JemHelper::loadCss('jem');
 			JemHelper::loadCustomCss();
 			JemHelper::loadCustomTag();
+
+			if ($print) {
+				JemHelper::loadCss('print');
+				$document->setMetaData('robots', 'noindex, nofollow');
+			}
 
 			//get data from model
 			$state		= $this->get('State');
@@ -178,12 +186,13 @@ class JemViewCategory extends JEMView
 			// get variables
 			$itemid				= JRequest::getInt('id', 0) . ':' . JRequest::getInt('Itemid', 0);
 
+			$this->showsubcats      = (bool)$params->get('usecat', 1);
+			$this->showemptysubcats = (bool)$params->get('showemptychilds', 1);
 
 			$filter_order		= $app->getUserStateFromRequest('com_jem.category.'.$itemid.'.filter_order', 'filter_order', 	'a.dates', 'cmd');
 			$filter_order_Dir	= $app->getUserStateFromRequest('com_jem.category.'.$itemid.'.filter_order_Dir', 'filter_order_Dir',	'', 'word');
 			$filter_type		= $app->getUserStateFromRequest('com_jem.category.'.$itemid.'.filter_filtertype', 'filter_type', '', 'int');
 			$search 			= $app->getUserStateFromRequest('com_jem.category.'.$itemid.'.filter_search', 'filter_search', '', 'string');
-			$search 			= $db->escape(trim(JString::strtolower($search)));
 			$task 				= JRequest::getWord('task');
 
 			// table ordering

@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.7
+ * @version 2.0.0
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -82,7 +82,7 @@ class JemViewSearch extends JEMView
 		$pageclass_sfx = $params->get('pageclass_sfx');
 
 		if ($task == 'archive') {
-			$pathway->addItem(JText::_('COM_JEM_ARCHIVE'), JRoute::_('index.php?view=search&task=archive'));
+			$pathway->addItem(JText::_('COM_JEM_ARCHIVE'), JRoute::_('index.php?option=com_jem&view=search&task=archive'));
 			$pagetitle   .= ' - ' . JText::_('COM_JEM_ARCHIVE');
 			$pageheading .= ' - ' . JText::_('COM_JEM_ARCHIVE');
 		}
@@ -200,7 +200,7 @@ class JemViewSearch extends JEMView
 	protected function _buildSortLists()
 	{
 		$app = JFactory::getApplication();
-		$db = JFactory::getDBO();
+//		$db = JFactory::getDBO();
 		$task = JRequest::getWord('task');
 
 		$filter_order		= JRequest::getCmd('filter_order', 'a.dates');
@@ -212,7 +212,6 @@ class JemViewSearch extends JEMView
 		$filter_order_Dir	= JRequest::getWord('filter_order_Dir', $filter_order_DirDefault);
 
 		$filter 			= $app->getUserStateFromRequest('com_jem.search.filter_search', 'filter_search', '', 'string');
-		$filter 			= $db->escape(trim(JString::strtolower($filter)));
 
 		//$filter				= $this->escape(JRequest::getString('filter'));
 		$filter_type		= JRequest::getString('filter_type');

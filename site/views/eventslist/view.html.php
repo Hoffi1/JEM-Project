@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.7
+ * @version 2.0.0
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -37,7 +37,7 @@ class JemViewEventslist extends JEMView
 		$params 		= $app->getParams();
 		$uri 			= JFactory::getURI();
 		$pathway 		= $app->getPathWay();
-		$db 			= JFactory::getDBO();
+	//	$db 			= JFactory::getDBO();
 		$user			= JFactory::getUser();
 		$itemid 		= JRequest::getInt('id', 0) . ':' . JRequest::getInt('Itemid', 0);
 		$print			= JRequest::getBool('print');
@@ -63,7 +63,6 @@ class JemViewEventslist extends JEMView
 		$filter_order_Dir	= $app->getUserStateFromRequest('com_jem.eventslist.'.$itemid.'.filter_order_Dir', 'filter_order_Dir', $filter_order_DirDefault, 'word');
 		$filter_type		= $app->getUserStateFromRequest('com_jem.eventslist.'.$itemid.'.filter_type', 'filter_type', '', 'int');
 		$search 			= $app->getUserStateFromRequest('com_jem.eventslist.'.$itemid.'.filter_search', 'filter_search', '', 'string');
-		$search 			= $db->escape(trim(JString::strtolower($search)));
 
 		// table ordering
 		$lists['order_Dir'] = $filter_order_Dir;
@@ -90,13 +89,13 @@ class JemViewEventslist extends JEMView
 		}
 
 		if ($task == 'archive') {
-			$pathway->addItem(JText::_('COM_JEM_ARCHIVE'), JRoute::_('index.php?view=eventslist&task=archive') );
-			$print_link = JRoute::_('index.php?view=eventslist&task=archive&tmpl=component&print=1');
+			$pathway->addItem(JText::_('COM_JEM_ARCHIVE'), JRoute::_('index.php?option=com_jem&view=eventslist&task=archive') );
+			$print_link = JRoute::_('index.php?option=com_jem&view=eventslist&task=archive&tmpl=component&print=1');
 			$pagetitle   .= ' - ' . JText::_('COM_JEM_ARCHIVE');
 			$pageheading .= ' - ' . JText::_('COM_JEM_ARCHIVE');
 			$params->set('page_heading', $pageheading);
 		} else {
-			$print_link = JRoute::_('index.php?view=eventslist&tmpl=component&print=1');
+			$print_link = JRoute::_('index.php?option=com_jem&view=eventslist&tmpl=component&print=1');
 		}
 
 		// Add site name to title if param is set

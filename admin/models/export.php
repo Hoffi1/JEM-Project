@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.7
+ * @version 2.0.0
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -91,13 +91,14 @@ class JEMModelExport extends JModelList
 		
 		// check if startdate + enddate are set.
 		if (! empty($startdate) && ! empty($enddate)) {
-			$query->where('DATEDIFF(IF (a.enddates IS NOT NULL, a.enddates, a.dates), "' . $startdate . '") >= 0');
-			$query->where('DATEDIFF(a.dates, "' . $enddate . '") <= 0');
+			$query->where('DATEDIFF(IF (a.enddates IS NOT NULL, a.enddates, a.dates), ' . $db->quote($startdate) . ') >= 0');
+			$query->where('DATEDIFF(a.dates, ' . $db->quote($enddate) . ') <= 0');
 		}
 
 		// check if specific category's have been selected
 		if (! empty($cats)) {
-			$query->where('  (c.id=' . implode(' OR c.id=', $cats) . ')');
+			JArrayHelper::toInteger($cats);
+			$query->where('  c.id IN (' . implode(',', $cats) . ')');
 		}
 
 		// Group the query
@@ -300,7 +301,7 @@ class JEMModelExport extends JModelList
 
 		$where = ' WHERE c.published = 1';
 
-		$query = 'SELECT c.* FROM #__jem_categories AS c' . $where . ' ORDER BY parent_id, c.ordering';
+		$query = 'SELECT c.* FROM #__jem_categories AS c' . $where . ' ORDER BY parent_id, c.lft';
 		$db->setQuery($query);
 
 		$mitems = $db->loadObjectList();
@@ -310,25 +311,23 @@ class JEMModelExport extends JModelList
 			JError::raiseNotice(500, $db->getErrorMsg());
 		}
 
-		if (!$mitems){
+		if (!$mitems) {
 			$mitems = array();
 			$children = array();
 
-			$parentid = $mitems;
-		}else{
+			$parentid = 0;
+		} else {
+			$children = array();
+			// First pass - collect children
+			foreach ($mitems as $v) {
+				$pt = $v->parent_id;
+				$list = @$children[$pt] ? $children[$pt] : array();
+				array_push($list, $v);
+				$children[$pt] = $list;
+			}
 
-		$mitems_temp = $mitems;
-
-		$children = array();
-		// First pass - collect children
-		foreach ($mitems as $v){
-			$pt = $v->parent_id;
-			$list = @$children[$pt] ? $children[$pt] : array();
-			array_push($list, $v);
-			$children[$pt] = $list;
-		}
-
-		$parentid = intval($mitems[0]->parent_id);
+			// list childs of "root" which has no parent and normally id 1
+			$parentid = intval(@isset($children[0][0]->id) ? $children[0][0]->id : 1);
 		}
 
 		//get list of the items
@@ -351,7 +350,7 @@ class JEMModelExport extends JModelList
 		// Select the required fields from the table.
 		$query->select('catid');
 		$query->from('#__jem_cats_event_relations');
-		$query->where('itemid = ' . $id);
+		$query->where('itemid = ' . $db->quote($id));
 
 		$db->setQuery($query);
 		$catidlist = $db->loadObjectList();

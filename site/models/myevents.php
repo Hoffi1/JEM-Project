@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.7
+ * @version 2.0.0
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -56,6 +56,8 @@ class JEMModelMyevents extends JModelLegacy
 
 		$limit		= $app->getUserStateFromRequest('com_jem.myevents.limit', 'limit', $jemsettings->display_num, 'int');
 		$limitstart = $app->getUserStateFromRequest('com_jem.myevents.limitstart', 'limitstart', 0, 'int');
+		// correct start value if required
+		$limitstart = $limit ? (int)(floor($limitstart / $limit) * $limit) : 0;
 
 		$this->setState('limit', $limit);
 		$this->setState('limitstart', $limitstart);
@@ -261,7 +263,8 @@ class JEMModelMyevents extends JModelLegacy
 
 		if ($excluded_cats != '') {
 			$cats_excluded = explode(',', $excluded_cats);
-			$where [] = '  (c.id!=' . implode(' AND c.id!=', $cats_excluded) . ')';
+			JArrayHelper::toInteger($cats_excluded);
+			$where [] = '  c.id NOT IN (' . implode(',', $cats_excluded) . ')';
 		}
 		// === END Excluded categories add === //
 

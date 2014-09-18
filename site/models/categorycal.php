@@ -1,6 +1,6 @@
 <?php
 /**
- * @version 1.9.7
+ * @version 2.0.0
  * @package JEM
  * @copyright (C) 2013-2014 joomlaeventmanager.net
  * @copyright (C) 2005-2009 Christoph Lukes
@@ -346,10 +346,11 @@ class JEMModelCategoryCal extends JModelLegacy
 
 // 		$filter_state 	= $app->getUserStateFromRequest('com_jem.category.filter_state', 'filter_state', '', 'word');
 		$filter 		= $app->getUserStateFromRequest('com_jem.category.filter', 'filter', '', 'int');
-		$search 		= $app->getUserStateFromRequest('com_jem.category.filter_search', 'filter_search', '', 'string');
-		$search 		= $this->_db->escape(trim(JString::strtolower($search)));
+//		$search 		= $app->getUserStateFromRequest('com_jem.category.filter_search', 'filter_search', '', 'string');
+//		$search 		= $this->_db->escape(trim(JString::strtolower($search)));
 
 		$where = array();
+		$qid = $this->_db->Quote($this->_id);
 
 		// First thing we need to do is to select only needed events
 		if ($task == 'archive') {
@@ -360,9 +361,9 @@ class JEMModelCategoryCal extends JModelLegacy
 
 		// display event from direct childs ?
 		if (!$params->get('displayChilds', 0)) {
-			$where[] = ' rel.catid = '.$this->_id;
+			$where[] = ' rel.catid = '.$qid;
 		} else {
-			$where[] = ' (rel.catid = '.$this->_id . ' OR c.parent_id = '.$this->_id . ')';
+			$where[] = ' (rel.catid = '.$qid . ' OR c.parent_id = '.$qid . ')';
 		}
 
 		// display all event of recurring serie ?
@@ -423,7 +424,7 @@ class JEMModelCategoryCal extends JModelLegacy
 		// Support Joomla access levels instead of single group id
 		$levels = $user->getAuthorisedViewLevels();
 
-		$ordering = 'c.ordering ASC';
+		$ordering = 'c.lft ASC';
 
 		//build where clause
 		$where = ' WHERE cc.published = 1';
@@ -474,7 +475,7 @@ class JEMModelCategoryCal extends JModelLegacy
 		$query = 'SELECT *,'
 				.' CASE WHEN CHAR_LENGTH(alias) THEN CONCAT_WS(\':\', id, alias) ELSE id END as slug'
 				.' FROM #__jem_categories'
-				.' WHERE id = '.$this->_id;
+				.' WHERE id = '.(int)$this->_id;
 
 		$this->_db->setQuery($query);
 
